@@ -1,20 +1,12 @@
-const { Sequelize } = require('sequelize');
+const mongoose = require('mongoose');
 
-const sequelize = new Sequelize(
-  'postgres://postgres:1314@localhost:5432/postgres'
-);
+const mongoDBUri = 'mongodb+srv://F1:1234@cluster0.8xenowa.mongodb.net/';
 
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('Connected to the database');
+mongoose
+  .connect(mongoDBUri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((error) => console.error('Failed to connect to MongoDB:', error));
 
-    // Створення таблиць, якщо вони не існують
-    await sequelize.sync({ alter: true });
-    console.log('Database tables created');
-  } catch (error) {
-    console.error('Failed to connect to the database:', error);
-  }
-})();
+const db = mongoose.connection;
 
-module.exports = sequelize;
+module.exports = db;

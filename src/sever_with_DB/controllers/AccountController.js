@@ -4,7 +4,7 @@ const Token = require('../models/Token');
 // Отримати список облікових записів
 const getAccounts = async (req, res) => {
   try {
-    const accounts = await Account.findAll();
+    const accounts = await Account.find();
     res.json(accounts);
   } catch (error) {
     res.status(500).json({ error: 'Failed to get accounts' });
@@ -15,7 +15,8 @@ const getAccounts = async (req, res) => {
 const createAccount = async (req, res) => {
   const { username, password, role } = req.body;
   try {
-    const account = await Account.create({ username, password, role });
+    const account = new Account({ username, password, role });
+    await account.save();
     res.json(account);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create account' });
@@ -27,14 +28,14 @@ const updateAccount = async (req, res) => {
   const { id } = req.params;
   const { username, password, role } = req.body;
   try {
-    const account = await Account.findByPk(id);
+    const account = await Account.findByIdAndUpdate(
+      id,
+      { username, password, role },
+      { new: true }
+    );
     if (!account) {
       return res.status(404).json({ error: 'Account not found' });
     }
-    account.username = username;
-    account.password = password;
-    account.role = role;
-    await account.save();
     res.json(account);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update account' });
@@ -50,11 +51,10 @@ const deleteAccount = async (req, res) => {
     return res.status(403).json({ error: 'Only admin can delete accounts' });
   }
   try {
-    const account = await Account.findByPk(id);
+    const account = await Account.findByIdAndDelete(id);
     if (!account) {
       return res.status(404).json({ error: 'Account not found' });
     }
-    await account.destroy();
     res.json({ message: 'Account deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete account' });
@@ -65,7 +65,7 @@ const deleteAccount = async (req, res) => {
 const getAccountTokens = async (req, res) => {
   const { id } = req.params;
   try {
-    const tokens = await Token.findAll({ where: { accountId: id } });
+    const tokens = await Token.find({ accountId: id });
     res.json(tokens);
   } catch (error) {
     res.status(500).json({ error: 'Failed to get account tokens' });
@@ -75,7 +75,7 @@ const getAccountTokens = async (req, res) => {
 // Отримати список всіх токенів
 const getAllTokens = async (req, res) => {
   try {
-    const tokens = await Token.findAll();
+    const tokens = await Token.find();
     res.json(tokens);
   } catch (error) {
     res.status(500).json({ error: 'Failed to get all tokens' });
@@ -87,8 +87,9 @@ const createToken = async (req, res) => {
   const { accountId } = req.params;
   const { name } = req.body;
   try {
-    const token = await Token.create({ name, accountId });
-    const tokenString = `${name}-${token.id}`;
+    const token = new Token({ name, accountId });
+    await token.save();
+    const tokenString = `${name}-${token._id}`;
     res.json({ token: tokenString });
   } catch (error) {
     res.status(500).json({ error: 'Failed to create token' });
@@ -100,12 +101,10 @@ const updateToken = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
   try {
-    const token = await Token.findByPk(id);
+    const token = await Token.findByIdAndUpdate(id, { name }, { new: true });
     if (!token) {
       return res.status(404).json({ error: 'Token not found' });
     }
-    token.name = name;
-    await token.save();
     res.json(token);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update token' });
@@ -116,11 +115,10 @@ const updateToken = async (req, res) => {
 const deleteToken = async (req, res) => {
   const { id } = req.params;
   try {
-    const token = await Token.findByPk(id);
+    const token = await Token.findByIdAndDelete(id);
     if (!token) {
       return res.status(404).json({ error: 'Token not found' });
     }
-    await token.destroy();
     res.json({ message: 'Token deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete token' });
