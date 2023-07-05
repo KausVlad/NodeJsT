@@ -6,8 +6,10 @@
     "build": "npx rimraf dist/ && npx tsc",
     "s": "ts-node src/index.ts",
     "st": "nodemon src/server_MDB_JWT/serverJWT.js",
-    "socketS": "nodemon src/socket/server.js",
-    "socketC": "nodemon src/socket/client.js"
+    "socketS": "nodemon src/socket/client-server/server.js",
+    "socketC": "nodemon src/socket/client-server/client.js",
+    "socketST": "nodemon src/socket/speedTest/server.js",
+    "socketCT": "nodemon src/socket/speedTest/client.js"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
