@@ -1,23 +1,30 @@
-const io = require('socket.io')();
+const io = require('socket.io')(3000);
 
-// Обробник підключення клієнта
+function generateLargeData(length) {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let data = '';
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    data += characters.charAt(randomIndex);
+  }
+
+  return data;
+}
+
 io.on('connection', (socket) => {
-  console.log('Клієнт підключився');
+  console.log('A client connected.');
 
-  // Обробник отримання повідомлення від клієнта
-  socket.on('message', (data) => {
-    console.log('Повідомлення від клієнта:', data);
-    // Надіслати повідомлення назад клієнту
-    socket.emit('message', 'Повідомлення отримано');
+  // Відправка великих даних через WebSocket
+  socket.on('sendDataWS', () => {
+    const data = generateLargeData(); // Функція для генерації великих даних
+    socket.emit('dataWS', data);
   });
 
-  // Обробник відключення клієнта
-  socket.on('disconnect', () => {
-    console.log('Клієнт відключився');
+  // Відправка великих даних через HTTP polling
+  socket.on('sendDataHTTP', () => {
+    const data = generateLargeData(); // Функція для генерації великих даних
+    socket.emit('dataHTTP', data);
   });
-});
-
-// Запуск сервера на порту 3000
-io.listen(3000, () => {
-  console.log('Сервер запущено на порту 3000');
 });
