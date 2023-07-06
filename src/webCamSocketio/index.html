@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Webcam Stream</title>
+  <script src="https://cdn.socket.io/socket.io-3.0.1.min.js"></script>
+</head>
+
+<body>
+  <h1>Webcam Stream</h1>
+  <video id="video" autoplay></video>
+
+  <script>
+    // Підключення до сервера Socket.io
+    const socket = io();
+
+    // Отримання доступу до вебкамери і відображення потоку на сторінці
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        const videoElement = document.getElementById('video');
+        videoElement.srcObject = stream;
+
+        // Відправлення потоку даних до сервера
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            socket.emit('stream', event.data);
+          }
+        };
+        mediaRecorder.start();
+      })
+      .catch((error) => {
+        console.error('Помилка при отриманні доступу до вебкамери:', error);
+      });
+
+    // Приймання потоку даних від сервера і відображення його
+    socket.on('stream', (image) => {
+      const videoElement = document.getElementById('video');
+      videoElement.src = URL.createObjectURL(image);
+    });
+  </script>
+</body>
+
+</html>
